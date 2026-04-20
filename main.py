@@ -87,7 +87,6 @@ Examples:
         save_formats=args.format,
     )
 
-    # Print summary
     print()
     print("=" * 60)
     print("  Results Summary")

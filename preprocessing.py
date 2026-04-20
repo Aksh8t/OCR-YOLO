@@ -1,15 +1,3 @@
-"""
-preprocessing.py — Image preprocessing utilities using OpenCV.
-
-Steps:
-  1. Load image
-  2. Resize (proportional)
-  3. Convert to grayscale
-  4. Apply thresholding (Otsu / adaptive)
-  5. Remove noise (Gaussian / median blur)
-  6. Optional: Canny edge detection
-"""
-
 import cv2
 import numpy as np
 

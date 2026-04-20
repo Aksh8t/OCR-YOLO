@@ -120,8 +120,7 @@ def detect_regions(img_original: np.ndarray, img_processed: np.ndarray,
         if ocr_instance is not None:
             text_regions = detect_text_regions_paddle(img_original, ocr_instance)
 
-    # In auto mode, prefer table path if we found a meaningful number of cells
-    is_table = len(table_cells) >= 4  # at least a 2×2 table
+    is_table = len(table_cells) >= 4 
 
     return {
         "text_regions": text_regions,
