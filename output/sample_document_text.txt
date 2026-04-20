@@ -1,0 +1,13 @@
+OCR Pipeline Test Document
+This is a sample document created for testing the
+Optical Character Recognition pipeline. The system
+uses PaddleOcR as the primary engine with Tesseract
+as a fallback for low-confidence results.
+Key Features:
+1. Preprocessing with OpenCV
+2.Text region detection
+3.Table structure extraction
+4. Multi-language support (English, Hindi)
+5. CSV and Excel output
+Date:2025-04-20
+Author: OCR Pipeline
