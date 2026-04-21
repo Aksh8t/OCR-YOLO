@@ -12,8 +12,14 @@ except ImportError:
     PADDLE_AVAILABLE = False
 
 try:
+    import easyocr
+    EASYOCR_AVAILABLE = True
+    PADDLE_AVAILABLE = True # Pretend paddle is available since we wrap it
+except ImportError:
+    EASYOCR_AVAILABLE = False
+
+try:
     import pytesseract
-    # Check if the Tesseract binary is actually accessible
     try:
         pytesseract.get_tesseract_version()
         TESSERACT_AVAILABLE = True
@@ -24,27 +30,48 @@ except ImportError:
 
 from config import OCR_CONFIDENCE_THRESHOLD, LANG_MAP
 
+class EasyOCRWrapper:
+    def __init__(self, lang="en"):
+        self.reader = easyocr.Reader([lang], gpu=False)
+        
+    def ocr(self, img, cls=True):
+        res = self.reader.readtext(img)
+        paddle_format = []
+        if res:
+            for r in res:
+                box = r[0]
+                text = r[1]
+                conf = r[2]
+                paddle_format.append([box, (text, conf)])
+        return [paddle_format] if paddle_format else [[]]
 
 # ─── PaddleOCR Singleton ─────────────────────────────────────────────────────
 
 _paddle_instances: dict = {}
 
 
-def get_paddle_ocr(lang: str = "en") -> "PaddleOCR":
+def get_paddle_ocr(lang: str = "en"):
     """
-    Return a cached PaddleOCR instance for the given language.
-    Models are downloaded on first use (~150 MB).
+    Return a cached OCR instance for the given language.
+    Models are downloaded on first use.
     """
     if not PADDLE_AVAILABLE:
-        raise ImportError("paddleocr is not installed. Run: pip install paddleocr paddlepaddle")
+        raise ImportError("paddleocr/easyocr is not installed.")
 
     paddle_lang = LANG_MAP.get(lang, {}).get("paddle", "en")
     if paddle_lang not in _paddle_instances:
-        _paddle_instances[paddle_lang] = PaddleOCR(
-            use_angle_cls=True,
-            lang=paddle_lang,
-            show_log=False,
-        )
+        if EASYOCR_AVAILABLE:
+            _paddle_instances[paddle_lang] = EasyOCRWrapper(lang=paddle_lang)
+        else:
+            import multiprocessing
+            threads = multiprocessing.cpu_count() if hasattr(multiprocessing, 'cpu_count') else 4
+            _paddle_instances[paddle_lang] = PaddleOCR(
+                use_angle_cls=False,  # Speeds up significantly
+                lang=paddle_lang,
+                show_log=False,
+                det_limit_side_len=736, # Resize image heavily before detection to save CPU cycles
+                cpu_threads=max(1, threads),
+            )
     return _paddle_instances[paddle_lang]
 
 

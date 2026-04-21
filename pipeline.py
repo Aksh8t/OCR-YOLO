@@ -85,6 +85,7 @@ def run_pipeline(
             detection["table_cells"],
             extract_text_from_region,
             lang,
+            text_regions=detection.get("text_regions")
         )
         table_raw = normalize_table(table_raw)
 

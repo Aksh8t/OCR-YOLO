@@ -46,21 +46,42 @@ def group_into_rows(boxes, y_tolerance=ROW_Y_TOLERANCE):
     return rows
 
 
-def extract_table(img, boxes, ocr_fn, lang="en"):
+def extract_table(img, boxes, ocr_fn, lang="en", text_regions=None):
     """
     Extract a table as a 2D list of strings.
 
     Args:
-        img:     Original BGR image.
-        boxes:   List of table-cell bounding box dicts.
-        ocr_fn:  Function(img, bbox, lang) -> dict with "text" key.
-        lang:    Language code.
+        img:          Original BGR image.
+        boxes:        List of table-cell bounding box dicts.
+        ocr_fn:       Function(img, bbox, lang) -> dict with "text" key.
+        lang:         Language code.
+        text_regions: Pre-detected text regions to map to cells for speed.
 
     Returns:
         2D list (rows x cols) of cell text values.
     """
     rows = group_into_rows(boxes)
     table_data = []
+
+    # Map text regions to cells if available for huge speedup
+    if text_regions:
+        for row in rows:
+            row_data = []
+            for cell in row:
+                cx1, cy1, cx2, cy2 = cell["bbox"]
+                cell_text = []
+                for tr in text_regions:
+                    if "bbox" not in tr: continue
+                    tx1, ty1, tx2, ty2 = tr["bbox"]
+                    center_x, center_y = (tx1 + tx2) / 2, (ty1 + ty2) / 2
+                    if (cx1 - 2) <= center_x <= (cx2 + 2) and (cy1 - 2) <= center_y <= (cy2 + 2):
+                        cell_text.append((center_y, center_x, tr.get("text", "")))
+                
+                cell_text.sort()
+                text = " ".join([t[2] for t in cell_text]).strip()
+                row_data.append(text)
+            table_data.append(row_data)
+        return table_data
 
     for row in rows:
         row_data = []

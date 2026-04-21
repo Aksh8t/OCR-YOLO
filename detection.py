@@ -116,9 +116,8 @@ def detect_regions(img_original: np.ndarray, img_processed: np.ndarray,
     if mode in ("auto", "table"):
         table_cells = detect_table_contours(img_processed)
 
-    if mode in ("auto", "document"):
-        if ocr_instance is not None:
-            text_regions = detect_text_regions_paddle(img_original, ocr_instance)
+    if ocr_instance is not None:
+        text_regions = detect_text_regions_paddle(img_original, ocr_instance)
 
     is_table = len(table_cells) >= 4 
 
