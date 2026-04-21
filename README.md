@@ -1,144 +1,125 @@
-# 🚀 OCR Pipeline — Hybrid Text & Table Extraction
+# 🚀 OCR-YOLO: Advanced Hybrid OCR Pipeline
+
+![OCR Pipeline Hero](./assets/hero.png)
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PaddleOCR](https://img.shields.io/badge/Engine-PaddleOCR-red.svg)](https://github.com/PaddlePaddle/PaddleOCR)
 [![Tesseract OCR](https://img.shields.io/badge/Fallback-Tesseract-yellow.svg)](https://github.com/tesseract-ocr/tesseract)
 [![OpenCV](https://img.shields.io/badge/Vision-OpenCV-green.svg)](https://opencv.org/)
 
-A professional-grade, modular OCR pipeline designed for high-accuracy text extraction and complex table reconstruction. Inspired by the IEEE research on hybrid OCR systems, this implementation bridges the gap between raw text recognition and structured data extraction.
+**OCR-YOLO** is a professional-grade, modular OCR pipeline designed for high-accuracy text extraction and complex table reconstruction. It implements a smart hybrid detection strategy that automatically switches between document analysis and structured table extraction.
 
 ---
 
-## 📽️ System Architecture
+## 📽️ System Architecture & Logic
 
-Our pipeline uses a **Hybrid Detection Strategy**: it simultaneously analyzes image geometry (for tables) and textual density (for documents) to choose the optimal processing path.
+The pipeline operates on a "Vision-First, Text-Second" principle. It uses computer vision to understand the **layout** before invoking heavy OCR models.
 
 ```mermaid
 graph TD
     A[Input Image] --> B[Advanced Preprocessing]
     B --> C{Hybrid Detector}
     
-    C -->|Geometry Check| D[Contour Analysis]
-    C -->|Density Check| E[PaddleOCR Detection]
+    C -->|Geometry Check| D[Morphological Grid Analysis]
+    C -->|Density Check| E[PaddleOCR DB Predictor]
     
-    D -->|Lines Detected| F[Table Mode]
-    E -->|Text Dense| G[Document Mode]
+    D -->|Lines >= 4| F[Table Mode]
+    E -->|High Density| G[Document Mode]
     
     F --> H[Cell Grid Mapping]
-    H --> I[Regional OCR]
-    I --> J[Table Reconstruction]
+    H --> I[Regional OCR Mapping]
+    I --> J[2D Table Reconstruction]
     
     G --> K[Full Page OCR]
-    K --> L[Text Merging]
+    K --> L[Semantic Text Merging]
     
-    J --> M[Clean & Format]
+    J --> M[Clean & Finalize]
     L --> M
     
-    M --> N{Output Handler}
-    N --> O[CSV / Excel]
-    N --> P[Plain Text]
-    N --> Q[JSON Summary]
+    M --> N{Output Orchestrator}
+    N --> O[CSV / Excel / JSON]
+    N --> P[Structured Text]
 ```
 
 ---
 
-## ✨ Key Features
+## ✨ Core Innovations
 
-- **🧠 Intelligent Auto-Mode**: Automatically distinguishes between a scanned document and a structured table.
-- **📊 Table Reconstruction**: Not just text! It reconstructs the actual 2D grid into Excel/CSV, preserving row-column relationships.
-- **🌐 Multilingual Support**: Out-of-the-box support for English, Hindi, Chinese, French, and German.
-- **🛡️ Robust Fallback**: Uses PaddleOCR as the primary engine but can switch to Tesseract for low-confidence scenarios.
-- **⚡ Performance Optimized**: Maps pre-detected text regions to table cells to avoid redundant OCR calls.
+### 🧠 Intelligent Auto-Mode
+Most OCR tools fail at tables because they treat them as paragraphs. OCR-YOLO analyzes the **Hough lines** and **contours** to detect if the data is structured. If it finds a grid, it switches to a specialized `TableExtractor`.
 
----
+### 📊 Structural Integrity
+Unlike standard wrappers, we reconstruct the actual 2D grid. If a cell is empty or merged, the `normalize_table` logic ensures the final CSV/Excel output maintains perfect alignment with the original document.
 
-## 🛠️ Deep Dive: How it Works
-
-### 1. Preprocessing (OpenCV)
-Before OCR, the image undergoes a cleaning phase:
-- **Grayscale Conversion**: Reduces noise.
-- **Adaptive Thresholding**: Enhances text contrast against varied backgrounds.
-- **Morphological Operations**: Detects structural lines (horizontal/vertical) to identify tables.
-
-### 2. Detection Logic
-The system runs two concurrent detection modules:
-- **Structural**: Uses `cv2.findContours` to find rectangular grid cells.
-- **Semantic**: Uses PaddleOCR’s DB (Differentiable Binarization) detector to find text bounding boxes.
-
-### 3. Table Reconstruction (`table_extractor.py`)
-This is the core "magic". If a table is detected, the pipeline:
-1. Sorts all cell contours.
-2. Group boxes into rows based on a configurable `Y-tolerance`.
-3. Ensures all rows are balanced (normalized) to handle merged cells or missing borders.
+### 🛡️ Semantic Fallback System
+We utilize **PaddleOCR** for its state-of-the-art accuracy. However, if the confidence score drops below a configurable threshold (e.g., 0.5), the system automatically triggers **Tesseract OCR** as a cross-verification layer.
 
 ---
 
-## 🚀 Installation
+## 🔍 Module-by-Module Deep Dive
 
-### 1. System Requirements
-- Python 3.8 or higher.
-- **Tesseract OCR** (Recommended for fallback).
-  - [Download for Windows](https://github.com/UB-Mannheim/tesseract/wiki)
-  - [Download for Linux/Mac](https://tesseract-ocr.github.io/tessdoc/Installation.html)
+### 📷 `preprocessing.py`
+We don't just "read" the image. We refine it using:
+- **Otsu's Binarization**: Automatically calculates the threshold for the best contrast.
+- **Gaussian Blurring**: Removes "salt-and-pepper" noise from low-quality scans.
+- **Adaptive Resizing**: Scales large images to an optimal width (default 1024px) for speed without losing OCR precision.
 
-### 2. Setup Environment
+### 📐 `detection.py` & `table_extractor.py`
+This identifies the "bones" of the document.
+1. **Vertical/Horizontal Filtering**: Isolates structural lines.
+2. **Contour Extraction**: Identifies rectangles.
+3. **Y-Tolerance Grouping**: Because scanned tables are rarely perfectly straight, we use a proximity algorithm to group cells into logical rows.
+
+---
+
+## 🚀 Getting Started
+
+### 1. Installation
+Ensure you have Python 3.8+ and Tesseract installed on your system.
+
 ```bash
-# Clone the repository
 git clone https://github.com/Aksh8t/OCR-YOLO.git
 cd OCR-YOLO
-
-# Install dependencies
 pip install -r requirements.txt
 ```
 
----
-
-## 💻 Technical Usage
-
-### Command Line Standard
+### 2. Usage Examples
+**Auto-Detect (Recommended):**
 ```bash
-python main.py --image path/to/your/image.jpg --mode auto --format csv excel text
+python main.py --image invoice.png --mode auto
 ```
 
-### Argument Reference
-| Argument | Flag | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `image` | `-i` | *None* | **Required.** Path to the image file. |
-| `mode` | `-m` | `auto` | `auto`, `document`, or `table`. |
-| `lang` | `-l` | `en` | OCR Language (`en`, `hi`, `ch`, `fr`, `de`). |
-| `format` | `-f` | `csv text` | Output file types (space separated). |
-| `output` | `-o` | `output/` | Directory to save processed results. |
+**Forced Table Extraction:**
+```bash
+python main.py --image budget_2024.jpg --mode table --format excel
+```
+
+**Hindi Document Processing:**
+```bash
+python main.py --image hindi_letter.png --lang hi --format text
+```
 
 ---
 
-## 💹 Comparison with IEEE Baseline
+## 💹 Comparison with Baseline
 
-| Metric | IEEE Paper (YOLOv4) | Our Hybrid Pipeline |
+| Feature | Standard OCR | OCR-YOLO (Hybrid) |
 | :--- | :--- | :--- |
-| **Model** | Custom Trained YOLOv4 | Pretrained PaddleOCR + Contours |
-| **Setup Time** | Days (Training) | Minutes (Plug & Play) |
-| **Table Handling** | Bounding Box only | Full 2D Grid Reconstruction |
-| **Fallback** | No | Tesseract Multi-Engine Fallback |
-| **Accuracy** | Variable | High (Semantic + Geometric) |
+| **Document Layout** | Ignores layout | Preserves structure |
+| **Table Accuracy** | Scrambled text | Clean 2D Grid |
+| **Multi-Engine** | Single engine | PaddleOCR + Tesseract Fallback |
+| **Speed** | Constant | Variable (Fast mapping for tables) |
 
 ---
 
-## 📂 File Explanations
-
-- `main.py`: Entry point for CLI.
-- `pipeline.py`: Coordinates the flow between modules.
-- `ocr_engine.py`: Wrapper for PaddleOCR and Tesseract.
-- `detection.py`: Hybrid logic for finding text and grid cells.
-- `table_extractor.py`: Reconstructs the 2D data structure.
-- `config.py`: Hyperparameters for fine-tuning.
+## 🛠️ Configuration Fine-Tuning
+Tweak [`config.py`](config.py) to match your data:
+- `MIN_CONTOUR_AREA`: Increase to ignore small icons/noise.
+- `ROW_Y_TOLERANCE`: Increase if your scan is slightly tilted.
+- `OCR_CONFIDENCE_THRESHOLD`: Set to 0.7 for stricter quality control.
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! If you have ideas for improving accuracy or supporting more languages, feel free to open a Pull Request.
-
----
-
-## 📝 License
-This project is licensed under the MIT License - see the LICENSE file for details.
+## 🤝 Contributing & License
+Contributions are welcome! Please open an issue first to discuss major changes.
+Licensed under the **MIT License**.

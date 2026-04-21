@@ -13,6 +13,11 @@ from ocr_engine import (
     extract_text_from_region,
     PADDLE_AVAILABLE,
 )
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 from table_extractor import extract_table, normalize_table
 from postprocessing import postprocess, postprocess_table
 from output_handler import save_csv, save_excel, save_text
@@ -54,7 +59,7 @@ def run_pipeline(
     base_name = os.path.splitext(os.path.basename(image_path))[0]
 
     # ── Step 1: Preprocess ────────────────────────────────────────────────
-    print(f"[1/6] Preprocessing: {image_path}")
+    logger.info(f"Initiating pipeline for: {image_path}")
     images = preprocess(image_path)
     img_original = images["original"]
     img_processed = images["processed"]
@@ -79,7 +84,7 @@ def run_pipeline(
 
     # ── Step 3 & 4: OCR + Table Extraction ────────────────────────────────
     if mode_used == "table":
-        print(f"[3/6] Table detected ({len(detection['table_cells'])} cells). Extracting...")
+        logger.info(f"Table mode activated. Detected cells: {len(detection['table_cells'])}")
         table_raw = extract_table(
             img_original,
             detection["table_cells"],
