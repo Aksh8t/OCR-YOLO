@@ -1,125 +1,142 @@
-# 🚀 OCR-YOLO: Advanced Hybrid OCR Pipeline
+# 📑 OCR-YOLO: The Ultimate Hybrid OCR Ecosystem
 
 ![OCR Pipeline Hero](./assets/hero.png)
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![PaddleOCR](https://img.shields.io/badge/Engine-PaddleOCR-red.svg)](https://github.com/PaddlePaddle/PaddleOCR)
-[![Tesseract OCR](https://img.shields.io/badge/Fallback-Tesseract-yellow.svg)](https://github.com/tesseract-ocr/tesseract)
-[![OpenCV](https://img.shields.io/badge/Vision-OpenCV-green.svg)](https://opencv.org/)
-
-**OCR-YOLO** is a professional-grade, modular OCR pipeline designed for high-accuracy text extraction and complex table reconstruction. It implements a smart hybrid detection strategy that automatically switches between document analysis and structured table extraction.
+<div align="center">
+  <h3>Modular • Multilingual • Intelligent • Production-Ready</h3>
+  <p><i>The bridge between unstructured pixels and structured information.</i></p>
+</div>
 
 ---
 
-## 📽️ System Architecture & Logic
+## 🌟 Overview
+**OCR-YOLO** is a cutting-edge, hybrid OCR pipeline designed to solve the most difficult challenge in document digitisation: **reclaiming structure from chaos.** Unlike standard OCR tools that output a "wall of text," OCR-YOLO understands the geometry of your documents, perfectly reconstructing tables and maintaining textual hierarchy.
 
-The pipeline operates on a "Vision-First, Text-Second" principle. It uses computer vision to understand the **layout** before invoking heavy OCR models.
+### 🎯 Why OCR-YOLO?
+- **Hybrid Intelligence**: Combines Contour Geometry (OpenCV) with Semantic Recognition (PaddleOCR).
+- **Zero Training Required**: Ships with high-fidelity pretrained models.
+- **Fail-Safe Processing**: Dual-engine architecture with Tesseract fallback.
+- **Data-Ready Exports**: One-click conversion to CSV, Excel, and JSON.
+
+---
+
+## 🏗️ Holistic Architecture
+
+Our pipeline transitions through four distinct abstraction layers to ensure maximum accuracy:
 
 ```mermaid
 graph TD
-    A[Input Image] --> B[Advanced Preprocessing]
-    B --> C{Hybrid Detector}
-    
-    C -->|Geometry Check| D[Morphological Grid Analysis]
-    C -->|Density Check| E[PaddleOCR DB Predictor]
-    
-    D -->|Lines >= 4| F[Table Mode]
-    E -->|High Density| G[Document Mode]
-    
-    F --> H[Cell Grid Mapping]
-    H --> I[Regional OCR Mapping]
-    I --> J[2D Table Reconstruction]
-    
-    G --> K[Full Page OCR]
-    K --> L[Semantic Text Merging]
-    
-    J --> M[Clean & Finalize]
-    L --> M
-    
-    M --> N{Output Orchestrator}
-    N --> O[CSV / Excel / JSON]
-    N --> P[Structured Text]
+    subgraph Layer 1: Computer Vision
+    A[Input Image] --> B[Adaptive Binarization]
+    B --> C[Denoising & Scaling]
+    end
+
+    subgraph Layer 2: Geometric Analysis
+    C --> D{Hybrid Dispatcher}
+    D -->|Hough Lines| E[Table Detection]
+    D -->|Density Map| F[Document Detection]
+    end
+
+    subgraph Layer 3: Extraction Engine
+    E --> G[2D Grid Mapping]
+    F --> H[Stream OCR]
+    G --> I[PaddleOCR + Fallback]
+    H --> I
+    end
+
+    subgraph Layer 4: Data Synthesis
+    I --> J[Post-processing]
+    J --> K[CSV / XLSX / JSON]
+    J --> L[Structured MD / TXT]
+    end
+
+    style D fill:#f9f,stroke:#333,stroke-width:2px
+    style I fill:#bbf,stroke:#333,stroke-width:4px
 ```
 
 ---
 
-## ✨ Core Innovations
+## 🚀 Quick Start in 60 Seconds
 
-### 🧠 Intelligent Auto-Mode
-Most OCR tools fail at tables because they treat them as paragraphs. OCR-YOLO analyzes the **Hough lines** and **contours** to detect if the data is structured. If it finds a grid, it switches to a specialized `TableExtractor`.
+### 1. Prerequisites
+- **Python 3.8+**
+- **Tesseract OCR** (For fallback support)
 
-### 📊 Structural Integrity
-Unlike standard wrappers, we reconstruct the actual 2D grid. If a cell is empty or merged, the `normalize_table` logic ensures the final CSV/Excel output maintains perfect alignment with the original document.
-
-### 🛡️ Semantic Fallback System
-We utilize **PaddleOCR** for its state-of-the-art accuracy. However, if the confidence score drops below a configurable threshold (e.g., 0.5), the system automatically triggers **Tesseract OCR** as a cross-verification layer.
-
----
-
-## 🔍 Module-by-Module Deep Dive
-
-### 📷 `preprocessing.py`
-We don't just "read" the image. We refine it using:
-- **Otsu's Binarization**: Automatically calculates the threshold for the best contrast.
-- **Gaussian Blurring**: Removes "salt-and-pepper" noise from low-quality scans.
-- **Adaptive Resizing**: Scales large images to an optimal width (default 1024px) for speed without losing OCR precision.
-
-### 📐 `detection.py` & `table_extractor.py`
-This identifies the "bones" of the document.
-1. **Vertical/Horizontal Filtering**: Isolates structural lines.
-2. **Contour Extraction**: Identifies rectangles.
-3. **Y-Tolerance Grouping**: Because scanned tables are rarely perfectly straight, we use a proximity algorithm to group cells into logical rows.
-
----
-
-## 🚀 Getting Started
-
-### 1. Installation
-Ensure you have Python 3.8+ and Tesseract installed on your system.
-
+### 2. Installation
 ```bash
-git clone https://github.com/Aksh8t/OCR-YOLO.git
-cd OCR-YOLO
+# Clone & Enter
+git clone https://github.com/Aksh8t/OCR-YOLO.git && cd OCR-YOLO
+
+# Install Core
 pip install -r requirements.txt
 ```
 
-### 2. Usage Examples
-**Auto-Detect (Recommended):**
-```bash
-python main.py --image invoice.png --mode auto
-```
-
-**Forced Table Extraction:**
-```bash
-python main.py --image budget_2024.jpg --mode table --format excel
-```
-
-**Hindi Document Processing:**
-```bash
-python main.py --image hindi_letter.png --lang hi --format text
-```
+### 3. Basic Execution
+| Task | Command |
+| :--- | :--- |
+| **Detect Everything** | `python main.py -i sample.png` |
+| **Specific Table** | `python main.py -i table.png -m table` |
+| **Hindi Document** | `python main.py -i doc.png -l hi` |
+| **Export All** | `python main.py -i doc.png -f csv excel text` |
 
 ---
 
-## 💹 Comparison with Baseline
+## 🛠️ Modular Breakdown
 
-| Feature | Standard OCR | OCR-YOLO (Hybrid) |
-| :--- | :--- | :--- |
-| **Document Layout** | Ignores layout | Preserves structure |
-| **Table Accuracy** | Scrambled text | Clean 2D Grid |
-| **Multi-Engine** | Single engine | PaddleOCR + Tesseract Fallback |
-| **Speed** | Constant | Variable (Fast mapping for tables) |
+### 📷 1. Preprocessing (`preprocessing.py`)
+> **The Foundation of Accuracy.**  
+> We use **Otsu’s Binarization** to handle varied lighting conditions and **Gaussian Smoothing** to eliminate compression artifacts. This ensures the OCR engine sees only the purest form of the characters.
+
+### 📐 2. Structural Mapping (`detection.py`)
+> **Geometry over Pixels.**  
+> By applying morphological opening and closing, we isolate the "skeleton" of the table. This allows us to detect cells even if the border lines are faint or slightly broken.
+
+### 📊 3. Table Reconstruction (`table_extractor.py`)
+> **The 2D Orchestrator.**  
+> Most OCRs fail at tables. Ours uses a unique **Y-Coordinate Tolerance Algorithm** to group floating text into logical rows, ensuring that even misaligned scans produce perfect spreadsheets.
+
+### 🛡️ 4. Adaptive OCR Engine (`ocr_engine.py`)
+> **Reliability by Design.**  
+> We prioritize **PaddleOCR** for its superior speed and multi-language support. If accuracy falls below 50%, the system cross-references with **Tesseract** to ensure data integrity.
 
 ---
 
-## 🛠️ Configuration Fine-Tuning
-Tweak [`config.py`](config.py) to match your data:
-- `MIN_CONTOUR_AREA`: Increase to ignore small icons/noise.
-- `ROW_Y_TOLERANCE`: Increase if your scan is slightly tilted.
-- `OCR_CONFIDENCE_THRESHOLD`: Set to 0.7 for stricter quality control.
+## 🌐 Multilingual Matrix
+
+| Code | Language | Engine Support | Tesseract Data |
+| :--- | :--- | :--- | :--- |
+| `en` | **English** | ✅ Native | `eng` |
+| `hi` | **Hindi** | ✅ Native | `hin` |
+| `ch` | **Chinese** | ✅ Native | `chi_sim` |
+| `fr` | **French** | ✅ Specialized | `fra` |
+| `de` | **German** | ✅ Specialized | `deu` |
 
 ---
 
-## 🤝 Contributing & License
-Contributions are welcome! Please open an issue first to discuss major changes.
-Licensed under the **MIT License**.
+## ⚙️ Advanced Configuration
+
+Fine-tune the pipeline in [`config.py`](config.py):
+
+- `MAX_IMAGE_WIDTH`: Optimised at `1024px` for the best speed/accuracy ratio.
+- `ROW_Y_TOLERANCE`: Set at `15px`; increase this if your documents are heavily skewed.
+- `OCR_CONFIDENCE_THRESHOLD`: The "guardrail" value for engine fallback.
+
+---
+
+## 🆘 Troubleshooting & FAQ
+
+**Q: My table isn't being detected as a table.**  
+A: Ensure the lines are visible. You can lower `MIN_CONTOUR_AREA` in config if the table is very small.
+
+**Q: Installation fails on PaddleOCR.**  
+A: Ensure you have `C++ Build Tools` installed if you are on Windows. Alternatively, try `pip install paddlepaddle`.
+
+---
+
+## 🤝 Contributing
+We believe in open-source collaboration. See a bug? Have a feature request? Open an issue or submit a PR!
+
+---
+
+## 📝 License
+Distributed under the **MIT License**. Created with ❤️ for researchers and developers.
