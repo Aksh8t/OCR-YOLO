@@ -130,7 +130,6 @@ A: Ensure the lines are visible. You can lower `MIN_CONTOUR_AREA` in config if t
 
 **Q: Installation fails on PaddleOCR.**  
 A: Ensure you have `C++ Build Tools` installed if you are on Windows. Alternatively, try `pip install paddlepaddle`.
-
 ---
 
 ## 🤝 Contributing
