@@ -50,8 +50,8 @@ graph TD
     J --> L[Structured MD / TXT]
     end
 
-    style D fill:#f9f,stroke:#333,stroke-width:2px
-    style I fill:#bbf,stroke:#333,stroke-width:4px
+    style D fill:#f9f,stroke:#333,stroke-width:2px,color:#000
+    style I fill:#bbf,stroke:#333,stroke-width:4px,color:#000
 ```
 
 ---
