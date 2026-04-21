@@ -1,7 +1,5 @@
 # 📑 OCR-YOLO: The Ultimate Hybrid OCR Ecosystem
 
-![OCR Pipeline Hero](./assets/hero.png)
-
 <div align="center">
   <h3>Modular • Multilingual • Intelligent • Production-Ready</h3>
   <p><i>The bridge between unstructured pixels and structured information.</i></p>
@@ -131,6 +129,26 @@ A: Ensure the lines are visible. You can lower `MIN_CONTOUR_AREA` in config if t
 **Q: Installation fails on PaddleOCR.**  
 A: Ensure you have `C++ Build Tools` installed if you are on Windows. Alternatively, try `pip install paddlepaddle`.
 ---
+
+---
+
+## 📊 Extraction Example: Image to Data
+This demonstration shows how **OCR-YOLO** bridges the gap between raw pixels and structured formats, accurately mapping cell coordinates to a 2D grid.
+
+### 📥 Input Image
+![Sample Table](https://raw.githubusercontent.com/Aksh8t/OCR-YOLO/019b2c469130a7429a1e4a8a3bda2f8700f33295/sample_table.png)
+
+### 📤 Structured Output
+The pipeline identifies the rows and columns to reconstruct the following table:
+
+| Name | Subject | Score | Grade |
+| :--- | :--- | :--- | :--- |
+| Alice | Math | 95 | A+ |
+| Bob | Science | 87 | A |
+| Charlie | English | 76 | B+ |
+| Diana | History | 91 | A |
+
+> **Note:** Even with varied text alignments, the `ROW_Y_TOLERANCE` algorithm ensures each entry is mapped to the correct logical row for CSV/Excel export.
 
 ## 🤝 Contributing
 We believe in open-source collaboration. See a bug? Have a feature request? Open an issue or submit a PR!
